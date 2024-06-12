@@ -41,10 +41,10 @@ const RegisterVoter = () => {
                     Unit:
                     <select value={unit} onChange={(e) => setUnit(e.target.value)} required>
                         <option value="">Select Unit</option>
-                        <option value="education">Political Science Edu</option>
+                        <option value="polscedu">Political Science Edu</option>
                         <option value="socialstudies">Social Studies</option>
-                        <option value="pumpernickel">Economics Edu</option>
-                        <option value="reeses">Geography Edu</option>
+                        <option value="economicsedu">Economics Edu</option>
+                        <option value="geographyedu">Geography Edu</option>
                     </select>
                 </label>
                 <label>
