@@ -1,18 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { db } from '../firebaseConfig';
-import { collection, getDocs, addDoc, query, where } from 'firebase/firestore';
-import { useHistory } from 'react-router-dom';
+import { collection, getDocs, addDoc, query, where, updateDoc } from 'firebase/firestore'; // Added updateDoc
+import { useNavigate } from 'react-router-dom'; // Replaced useHistory with useNavigate
 
 const VotingPage = () => {
     const [candidates, setCandidates] = useState([]);
     const [selectedVotes, setSelectedVotes] = useState({});
     const [message, setMessage] = useState('');
-    const history = useHistory();
+    const navigate = useNavigate();
 
     useEffect(() => {
         const voter = JSON.parse(sessionStorage.getItem('voter'));
         if (!voter) {
-            history.push('/login');
+            navigate('/voter-login');
             return;
         }
 
@@ -23,7 +23,7 @@ const VotingPage = () => {
         };
 
         fetchCandidates();
-    }, [history]);
+    }, [navigate]);
 
     const handleVoteChange = (position, candidateId) => {
         setSelectedVotes(prevVotes => ({ ...prevVotes, [position]: candidateId }));
@@ -60,12 +60,6 @@ const VotingPage = () => {
     return (
         <div className="container">
             <h1>Vote for Candidates</h1>
-            {candidates.reduce((positions, candidate) => {
-                if (!positions[candidate.position]) positions[candidate.position] = [];
-                positions[candidate.position].push(candidate);
-                return positions;
-            }, {})}
-
             {Object.entries(candidates.reduce((positions, candidate) => {
                 if (!positions[candidate.position]) positions[candidate.position] = [];
                 positions[candidate.position].push(candidate);

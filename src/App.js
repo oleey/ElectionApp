@@ -5,6 +5,8 @@ import AdminLogin from './components/AdminLogin';
 import UploadCandidate from './components/UploadCandidate';
 import AdminDashboard from './components/AdminDashboard';
 import VotingPage from './components/VotingPage.js';
+import VoterLogin from './components/VoterLogin.js';
+
 
 import './App.css';
 
