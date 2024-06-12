@@ -1,104 +1,140 @@
 import React, { useState, useEffect } from 'react';
 import { db } from '../firebaseConfig';
-import { collection, getDocs, query, where, doc, updateDoc, arrayUnion } from 'firebase/firestore';
+import { collection, getDocs, query, where, addDoc } from 'firebase/firestore';
 
 const VotingPage = () => {
     const [regNo, setRegNo] = useState('');
-    const [isRegistered, setIsRegistered] = useState(false);
-    const [message, setMessage] = useState('');
+    const [password, setPassword] = useState('');
+    const [positions, setPositions] = useState([]);
+    const [selectedPosition, setSelectedPosition] = useState('');
     const [candidates, setCandidates] = useState([]);
-    const [loading, setLoading] = useState(false);
-    const [voted, setVoted] = useState(false);
+    const [selectedCandidate, setSelectedCandidate] = useState('');
+    const [message, setMessage] = useState('');
+    const [hasVoted, setHasVoted] = useState(false);
 
-    const handleRegNoChange = (e) => {
-        setRegNo(e.target.value);
-    };
-
-    const checkRegistration = async (event) => {
-        event.preventDefault();
-        setLoading(true);
-
-        try {
-            const q = query(collection(db, 'voters'), where('regNo', '==', regNo));
-            const querySnapshot = await getDocs(q);
-
-            if (querySnapshot.empty) {
-                setMessage('You cannot vote.');
-                setIsRegistered(false);
-            } else {
-                setIsRegistered(true);
-                setMessage('');
-                fetchCandidates();
+    useEffect(() => {
+        const fetchPositions = async () => {
+            try {
+                const positionsRef = collection(db, 'positions');
+                const positionsSnapshot = await getDocs(positionsRef);
+                const positionsList = positionsSnapshot.docs.map(doc => doc.data().name);
+                setPositions(positionsList);
+            } catch (error) {
+                setMessage('Error fetching positions: ' + error.message);
             }
-        } catch (error) {
-            setMessage('Error checking registration: ' + error.message);
-        } finally {
-            setLoading(false);
+        };
+        fetchPositions();
+    }, []);
+
+    const checkVoterStatus = async () => {
+        setMessage('');
+        const votersRef = collection(db, 'voters');
+        const q = query(votersRef, where('regNo', '==', regNo), where('password', '==', password));
+        const querySnapshot = await getDocs(q);
+
+        if (querySnapshot.empty) {
+            setMessage('Invalid registration number or password.');
+        } else {
+            const votesRef = collection(db, 'votes');
+            const voteQuery = query(votesRef, where('regNo', '==', regNo), where('position', '==', selectedPosition));
+            const voteSnapshot = await getDocs(voteQuery);
+
+            if (!voteSnapshot.empty) {
+                setHasVoted(true);
+                setMessage('You have already voted for this position.');
+            } else {
+                setHasVoted(false);
+                fetchCandidates(selectedPosition);
+            }
         }
     };
 
-    const fetchCandidates = async () => {
+    const fetchCandidates = async (position) => {
         try {
-            const querySnapshot = await getDocs(collection(db, 'candidates'));
-            const candidatesList = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            const candidatesRef = collection(db, 'candidates');
+            const candidatesQuery = query(candidatesRef, where('position', '==', position));
+            const candidatesSnapshot = await getDocs(candidatesQuery);
+            const candidatesList = candidatesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
             setCandidates(candidatesList);
         } catch (error) {
             setMessage('Error fetching candidates: ' + error.message);
         }
     };
 
-    const voteForCandidate = async (candidateId) => {
+    const castVote = async () => {
+        if (!selectedCandidate) {
+            setMessage('Please select a candidate to vote for.');
+            return;
+        }
+
         try {
-            const userDoc = doc(db, 'voters', regNo);
-            await updateDoc(userDoc, {
-                votedFor: candidateId
+            await addDoc(collection(db, 'votes'), {
+                regNo,
+                position: selectedPosition,
+                candidateId: selectedCandidate,
+                timestamp: new Date()
             });
-            setMessage('Your vote has been recorded!');
-            setVoted(true);
+            setMessage('Vote cast successfully!');
+            setHasVoted(true);
         } catch (error) {
-            setMessage('Error voting for candidate: ' + error.message);
+            setMessage('Error casting vote: ' + error.message);
         }
     };
 
     return (
         <div className="container">
-            <h1>Vote for Your Candidate</h1>
-            {isRegistered ? (
-                voted ? (
-                    <p>{message}</p>
-                ) : (
-                    <>
-                        <h2>Candidates List</h2>
-                        <ul>
-                            {candidates.map(candidate => (
-                                <li key={candidate.id}>
-                                    <p>Name: {candidate.name}</p>
-                                    <p>Unit: {candidate.unit}</p>
-                                    <p>Level: {candidate.level}</p>
-                                    <p>Email Address: {candidate.email}</p>
-                                    <p>Position:{candidate.position}</p>
-                                    <img src={candidate.pictureURL} alt={candidate.name} width="100" />
-                                    <button onClick={() => voteForCandidate(candidate.id)}>Vote</button>
-                                </li>
-                            ))}
-                        </ul>
-                        <p>{message}</p>
-                    </>
-                )
+            <h1>Student Voting</h1>
+            <form onSubmit={(e) => {
+                e.preventDefault();
+                checkVoterStatus();
+            }}>
+                <label>
+                    Registration Number:
+                    <input type="text" value={regNo} onChange={(e) => setRegNo(e.target.value)} required />
+                </label>
+                <label>
+                    Password:
+                    <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+                </label>
+                <label>
+                    Position:
+                    <select value={selectedPosition} onChange={(e) => setSelectedPosition(e.target.value)} required>
+                        <option value="">Select Position</option>
+                        {positions.map((position, index) => (
+                            <option key={index} value={position}>{position}</option>
+                        ))}
+                    </select>
+                </label>
+                <button type="submit">Check Voting Status</button>
+            </form>
+            {hasVoted ? (
+                <p>{message}</p>
             ) : (
-                <form onSubmit={checkRegistration}>
-                    <label>
-                        Registration Number:
-                        <input type="text" value={regNo} onChange={handleRegNoChange} required />
-                    </label>
-                    <button type="submit" disabled={loading}>
-                        {loading ? 'Checking...' : 'Check Registration'}
-                    </button>
-                    <p>{message}</p>
-                </form>
+                candidates.length > 0 && (
+                    <form onSubmit={(e) => {
+                        e.preventDefault();
+                        castVote();
+                    }}>
+                        <h2>Select a Candidate to Vote For</h2>
+                        {candidates.map(candidate => (
+                            <label key={candidate.id}>
+                                <input
+                                    type="radio"
+                                    value={candidate.id}
+                                    checked={selectedCandidate === candidate.id}
+                                    onChange={(e) => setSelectedCandidate(e.target.value)}
+                                />
+                                {candidate.name}
+                            </label>
+                        ))}
+                        <button type="submit">Vote</button>
+                    </form>
+                )
             )}
+            <p>{message}</p>
         </div>
     );
 };
 
 export default VotingPage;
+
