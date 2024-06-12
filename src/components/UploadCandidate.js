@@ -5,7 +5,6 @@ import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
 
 const UploadCandidate = () => {
     const [name, setName] = useState('');
-    const [email, setEmail] = useState('');
     const [unit, setUnit] = useState('');
     const [level, setLevel] = useState('');
     const [position, setPosition] = useState('');
@@ -26,17 +25,17 @@ const UploadCandidate = () => {
         setMessage('');
         setProgress(0);
 
-        if (!name || !email || !level || !unit || !picture) {
+        if (!name || !level || !unit || !picture) {
             setMessage('All fields are required');
             setLoading(false);
             return;
         }
 
-        if (picture.size > 5 * 1024 * 1024) { // 5 MB size limit
+       /* if (picture.size > 5 * 1024 * 1024) { // 5 MB size limit
             setMessage('Picture size should be less than 5MB');
             setLoading(false);
             return;
-        }
+        }*/
 
         const uploadPicture = async (picture) => {
             return new Promise((resolve, reject) => {
@@ -49,13 +48,13 @@ const UploadCandidate = () => {
                         setProgress(progress);
                     },
                     (error) => {
-                        if (error.code === 'storage/retry-limit-exceeded') {
+                       /* if (error.code === 'storage/retry-limit-exceeded') {
                             setTimeout(() => {
                                 uploadPicture(picture).then(resolve).catch(reject);
                             }, 2000); // retry after 2 seconds
                         } else {
                             reject(error);
-                        }
+                        }*/
                     },
                     () => {
                         getDownloadURL(uploadTask.snapshot.ref)
@@ -71,7 +70,6 @@ const UploadCandidate = () => {
 
             await addDoc(collection(db, 'candidates'), {
                 name,
-                email,
                 unit,
                 level,
                 position,
@@ -79,7 +77,6 @@ const UploadCandidate = () => {
             });
 
             setName('');
-            setEmail('');
             setUnit('');
             setLevel('');
             setPosition('');
@@ -101,10 +98,6 @@ const UploadCandidate = () => {
                 <label>
                     Full Name:
                     <input type="text" value={name} onChange={(e) => setName(e.target.value)} required />
-                </label>
-                <label>
-                    Email Address:
-                    <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
                 </label>
                 <label>
                     Unit:
