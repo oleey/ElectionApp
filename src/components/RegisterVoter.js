@@ -4,7 +4,6 @@ import { collection, addDoc } from 'firebase/firestore';
 
 const RegisterVoter = () => {
     const [regNo, setRegNo] = useState('');
-    const [email, setEmail] = useState('');
     const [name, setName] = useState('');
     const [unit, setUnit] = useState('');
     const [level, setLevel] = useState('');
@@ -17,7 +16,6 @@ const RegisterVoter = () => {
             await addDoc(collection(db, 'voters'), {
                 name: name,
                 regNo: regNo,
-                email: email,
                 unit: unit,
                 level: level
             });
@@ -36,10 +34,6 @@ const RegisterVoter = () => {
                     <input type="text" value={regNo} onChange={(e) => setRegNo(e.target.value)} required />
                 </label>
                 <label>
-                    Email Address:
-                    <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
-                </label>
-                <label>
                     Full Name:
                     <input type="text" value={name} onChange={(e) => setName(e.target.value)} required />
                 </label>
@@ -47,20 +41,20 @@ const RegisterVoter = () => {
                     Unit:
                     <select value={unit} onChange={(e) => setUnit(e.target.value)} required>
                         <option value="">Select Unit</option>
-                        <option value="education">Education</option>
+                        <option value="education">Political Science Edu</option>
                         <option value="socialstudies">Social Studies</option>
-                        <option value="pumpernickel">Pumpernickel</option>
-                        <option value="reeses">Reeses</option>
+                        <option value="pumpernickel">Economics Edu</option>
+                        <option value="reeses">Geography Edu</option>
                     </select>
                 </label>
                 <label>
                     Level:
                     <select value={level} onChange={(e) => setLevel(e.target.value)} required>
                         <option value="">Select Level</option>
-                        <option value="100l">100l</option>
-                        <option value="200l">200l</option>
-                        <option value="300l">300l</option>
-                        <option value="400l">400l</option>
+                        <option value="100l">100L</option>
+                        <option value="200l">200L</option>
+                        <option value="300l">300L</option>
+                        <option value="400l">400L</option>
                     </select>
                 </label>
 
