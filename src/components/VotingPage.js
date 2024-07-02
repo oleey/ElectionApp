@@ -1,106 +1,5 @@
 /*import React, { useState, useEffect } from 'react';
 import { db } from '../firebaseConfig';
-import { collection, getDocs, addDoc, query, where, updateDoc } from 'firebase/firestore'; // Added updateDoc
-import { useNavigate } from 'react-router-dom'; // Replaced useHistory with useNavigate
-
-const VotingPage = () => {
-    const [candidates, setCandidates] = useState([]);
-    const [selectedVotes, setSelectedVotes] = useState({});
-    const [message, setMessage] = useState('');
-    const navigate = useNavigate();
-
-    useEffect(() => {
-        const voter = JSON.parse(sessionStorage.getItem('voter'));
-        if (!voter) {
-            navigate('/voter-login');
-            return;
-        }
-
-        const fetchCandidates = async () => {
-            const candidatesSnapshot = await getDocs(collection(db, 'candidates'));
-            const candidatesList = candidatesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-            setCandidates(candidatesList);
-        };
-
-        fetchCandidates();
-
-        const voteForCandidate = async (candidateId) => {
-            try {
-                const userDoc = doc(db, 'voters', regNo);
-                await updateDoc(userDoc, {
-                    votedFor: candidateId
-                });
-                setMessage('Your vote has been recorded!');
-                setVoted(true);
-            } catch (error) {
-                setMessage('Error voting for candidate: ' + error.message);
-            }
-        };
-    }, [navigate]);
-
-    const handleVoteChange = (position, candidateId) => {
-        setSelectedVotes(prevVotes => ({ ...prevVotes, [position]: candidateId }));
-    };
-
-    
-
-    const handleSubmitVotes = async () => {
-        const voter = JSON.parse(sessionStorage.getItem('voter'));
-        if (!voter) {
-            setMessage('You are not logged in');
-            return;
-        }
-
-        try {
-            for (const [position, candidateId] of Object.entries(selectedVotes)) {
-                await addDoc(collection(db, 'votes'), {
-                    voterRegNumber: voter.regNumber,
-                    candidateId,
-                    position,
-                });
-            }
-
-            const voterDoc = query(collection(db, 'voters'), where('regNumber', '==', voter.regNumber));
-            const voterSnapshot = await getDocs(voterDoc);
-            const voterRef = voterSnapshot.docs[0].ref;
-
-            await updateDoc(voterRef, { hasVoted: true });
-
-            setMessage('Votes submitted successfully!');
-        } catch (error) {
-            setMessage('Error submitting votes: ' + error.message);
-        }
-    };
-
-    return (
-        <div className="container">
-            <h1>Vote for Candidates</h1>
-            <h2>Candidates List</h2>
-                        <ul>
-                            {candidates.map(candidate => (
-                                <li key={candidate.id}>
-                                    <p>Name: {candidate.name}</p>
-                                    <p>Unit: {candidate.unit}</p>
-                                    <p>Level: {candidate.level}</p>
-                                    <p>Email Address: {candidate.email}</p>
-                                    <p>Position:{candidate.position}</p>
-                                    <img src={candidate.pictureURL} alt={candidate.name} width="100" />
-                                    <button onClick={() => voteForCandidate(candidate.id)}>Vote</button>
-                                </li>
-                            ))}
-                        </ul>
-                        <p>{message}</p>
-            <button onClick={handleSubmitVotes}>Submit Votes</button>
-            <p>{message}</p>
-        </div>
-    );
-};
-
-export default VotingPage;
-*/
-
-import React, { useState, useEffect } from 'react';
-import { db } from '../firebaseConfig';
 import { collection, getDocs, updateDoc, doc, increment } from 'firebase/firestore';
 
 const VotingPage = () => {
@@ -179,4 +78,82 @@ const VotingPage = () => {
 };
 
 export default VotingPage;
+*/
+import React, { useState, useEffect } from 'react';
+import { db } from '../firebaseConfig';
+import { collection, getDocs, doc, updateDoc, increment, getDoc } from 'firebase/firestore';
+import { useNavigate } from 'react-router-dom';
+import styles from './VotingPage.module.css';
+
+const VotingPage = ({ voterId }) => {
+    const [candidates, setCandidates] = useState([]);
+    const [message, setMessage] = useState('');
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        const fetchCandidates = async () => {
+            try {
+                const querySnapshot = await getDocs(collection(db, 'candidates'));
+                const candidatesList = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                setCandidates(candidatesList);
+            } catch (error) {
+                setMessage('Error fetching candidates: ' + error.message);
+            }
+        };
+
+        fetchCandidates();
+    }, []);
+
+    const handleVote = async (candidateId, position) => {
+        try {
+            const voterDocRef = doc(db, 'voters', voterId);
+            const voterDoc = await getDoc(voterDocRef);
+            if (voterDoc.exists()) {
+                const voterData = voterDoc.data();
+                if (voterData.votes[position]) {
+                    setMessage('You have already voted for this position.');
+                    return;
+                }
+
+                const candidateDocRef = doc(db, 'candidates', candidateId);
+                await updateDoc(candidateDocRef, {
+                    votesCount: increment(1)
+                });
+
+                const updatedVotes = { ...voterData.votes, [position]: candidateId };
+                await updateDoc(voterDocRef, { votes: updatedVotes });
+
+                setMessage('Vote recorded successfully!');
+            } else {
+                setMessage('Voter not found.');
+            }
+        } catch (error) {
+            setMessage('Error recording vote: ' + error.message);
+        }
+    };
+
+    return (
+        <div className={styles.container}>
+            <h1>Voting Page</h1>
+            <p>{message}</p>
+            <div className={styles.candidatesList}>
+                {candidates.map(candidate => (
+                    <div key={candidate.id} className={styles.candidate}>
+                        <img src={candidate.pictureURL} alt={candidate.name} className={styles.candidatePicture} />
+                        <div className={styles.candidateDetails}>
+                            <h3>{candidate.name}</h3>
+                            <p>{candidate.position}</p>
+                            <button onClick={() => handleVote(candidate.id, candidate.position)}>
+                                Vote for {candidate.name}
+                            </button>
+                        </div>
+                    </div>
+                ))}
+            </div>
+        </div>
+    );
+};
+
+export default VotingPage;
+
 

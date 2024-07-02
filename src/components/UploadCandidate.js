@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { db, storage } from '../firebaseConfig';
-import { collection, addDoc } from 'firebase/firestore';
+import { collection, addDoc, DocumentReference } from 'firebase/firestore';
 import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
 
 const UploadCandidate = () => {
+    const [id, setId] = useState('');
     const [name, setName] = useState('');
     const [unit, setUnit] = useState('');
     const [level, setLevel] = useState('');
@@ -67,15 +68,21 @@ const UploadCandidate = () => {
 
         try {
             const pictureURL = await uploadPicture(picture);
+          //  console.log('111Candidate ID:', docRef.id); // You can use the ID for further processing if needed
+            console.log('Candidate ID:', DocumentReference.id); // You can use the ID for further processing if needed
+
 
             await addDoc(collection(db, 'candidates'), {
+                id: DocumentReference.id,
                 name,
                 unit,
                 level,
                 position,
-                pictureURL
+                pictureURL,
+                votescount: 0
             });
 
+            setId('');
             setName('');
             setUnit('');
             setLevel('');
