@@ -3,13 +3,13 @@ import { db } from '../firebaseConfig';
 import { collection, getDocs, updateDoc, doc, query, where } from 'firebase/firestore';
 import './VotingPage.css'; // Import specific CSS for the VotingPage
 
-const VotingPage = ({ voter }) => {
+const VotingPage = ({ location }) => {
+    const { state: { voter } } = location;
     const [positions, setPositions] = useState([]);
     const [candidates, setCandidates] = useState({});
     const [message, setMessage] = useState('');
 
     useEffect(() => {
-        // Fetch all positions
         const fetchPositions = async () => {
             const q = query(collection(db, 'positions'));
             const querySnapshot = await getDocs(q);
@@ -48,13 +48,11 @@ const VotingPage = ({ voter }) => {
         }
 
         try {
-            // Increment the candidate's votes
             const candidateRef = doc(db, 'candidates', candidateId);
             await updateDoc(candidateRef, {
                 votes: (candidates[position].find(c => c.id === candidateId).votes || 0) + 1
             });
 
-            // Mark voter as having voted for this position
             const voterRef = doc(db, 'voters', voter.id);
             await updateDoc(voterRef, {
                 [`hasVoted.${position}`]: true
