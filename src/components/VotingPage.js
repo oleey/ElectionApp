@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+/*import React, { useState, useEffect } from 'react';
 import { db } from '../firebaseConfig';
 import { collection, getDocs, addDoc, query, where, updateDoc } from 'firebase/firestore'; // Added updateDoc
 import { useNavigate } from 'react-router-dom'; // Replaced useHistory with useNavigate
@@ -97,3 +97,86 @@ const VotingPage = () => {
 };
 
 export default VotingPage;
+*/
+
+import React, { useState, useEffect } from 'react';
+import { db } from '../firebaseConfig';
+import { collection, getDocs, updateDoc, doc, increment } from 'firebase/firestore';
+
+const VotingPage = () => {
+    const [candidates, setCandidates] = useState([]);
+    const [selectedVotes, setSelectedVotes] = useState({});
+    const [message, setMessage] = useState('');
+
+    useEffect(() => {
+        const fetchCandidates = async () => {
+            try {
+                const candidatesSnapshot = await getDocs(collection(db, 'candidates'));
+                const candidatesList = candidatesSnapshot.docs.map(doc => ({
+                    id: doc.id,
+                    ...doc.data()
+                }));
+                setCandidates(candidatesList);
+            } catch (error) {
+                setMessage('Error fetching candidates: ' + error.message);
+            }
+        };
+
+        fetchCandidates();
+    }, []);
+
+    const handleVoteChange = (candidateId) => {
+        setSelectedVotes(prevVotes => ({
+            ...prevVotes,
+            [candidateId]: (prevVotes[candidateId] || 0) + 1
+        }));
+    };
+
+    const handleVoteSubmit = async (event) => {
+        event.preventDefault();
+        setMessage('');
+
+        try {
+            const voter = JSON.parse(sessionStorage.getItem('voter'));
+            if (!voter) {
+                setMessage('You must be logged in to vote.');
+                return;
+            }
+
+            const voterRef = doc(db, 'voters', voter.id);
+            await updateDoc(voterRef, { votes: selectedVotes });
+
+            setMessage('Your vote has been successfully submitted!');
+        } catch (error) {
+            setMessage('Error submitting your vote: ' + error.message);
+        }
+    };
+
+    return (
+        <div className="container">
+            <h1>Vote for Candidates</h1>
+            {message && <p>{message}</p>}
+            <form onSubmit={handleVoteSubmit}>
+                {candidates.map(candidate => (
+                    <div key={candidate.id}>
+                        <h3>{candidate.name}</h3>
+                        <p>Position: {candidate.position}</p>
+                        <p>Email: {candidate.email}</p>
+                        <p>Unit: {candidate.unit}</p>
+                        <p>Level: {candidate.level}</p>
+                        <button
+                            type="button"
+                            onClick={() => handleVoteChange(candidate.id)}
+                        >
+                            Vote for {candidate.name}
+                        </button>
+                    </div>
+                ))}
+                <button type="submit">Submit Vote</button>
+            </form>
+        </div>
+    );
+};
+
+export default VotingPage;
+
