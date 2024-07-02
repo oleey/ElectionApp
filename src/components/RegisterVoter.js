@@ -15,9 +15,11 @@ const RegisterVoter = () => {
         try {
             await addDoc(collection(db, 'voters'), {
                 name: name,
+                password: 'Nasses798,,@',
                 regNo: regNo,
                 unit: unit,
-                level: level
+                level: level,
+                hasVoted: {} // Initialize as an empty object
             });
             setMessage('Voters accredited successfully!');
         } catch (error) {

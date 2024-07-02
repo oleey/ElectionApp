@@ -70,7 +70,7 @@ const UploadCandidate = () => {
           //  console.log('111Candidate ID:', docRef.id); // You can use the ID for further processing if needed
 
 
-            const result = await addDoc(collection(db, 'candidates'), {
+            await addDoc(collection(db, 'candidates'), {
                 name,
                 unit,
                 level,
@@ -79,7 +79,7 @@ const UploadCandidate = () => {
                 votescount: 0
             });
 
-            console.log('Candidate ID:', result.id); // You can use the ID for further processing if needed
+           // console.log('Candidate ID:', result.id); // You can use the ID for further processing if needed
 
 
             setName('');
