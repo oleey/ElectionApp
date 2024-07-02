@@ -1,159 +1,106 @@
-/*import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { db } from '../firebaseConfig';
-import { collection, getDocs, updateDoc, doc, increment } from 'firebase/firestore';
+import { collection, getDocs, updateDoc, doc, query, where } from 'firebase/firestore';
+import './VotingPage.css'; // Import specific CSS for the VotingPage
 
-const VotingPage = () => {
-    const [candidates, setCandidates] = useState([]);
-    const [selectedVotes, setSelectedVotes] = useState({});
+const VotingPage = ({ voter }) => {
+    const [positions, setPositions] = useState([]);
+    const [candidates, setCandidates] = useState({});
     const [message, setMessage] = useState('');
 
     useEffect(() => {
+        // Fetch all positions
+        const fetchPositions = async () => {
+            const q = query(collection(db, 'positions'));
+            const querySnapshot = await getDocs(q);
+            const fetchedPositions = querySnapshot.docs.map(doc => doc.data().positionName);
+            setPositions(fetchedPositions);
+        };
+
+        fetchPositions();
+    }, []);
+
+    useEffect(() => {
         const fetchCandidates = async () => {
-            try {
-                const candidatesSnapshot = await getDocs(collection(db, 'candidates'));
-                const candidatesList = candidatesSnapshot.docs.map(doc => ({
+            const candidatesByPosition = {};
+
+            for (const position of positions) {
+                const q = query(collection(db, 'candidates'), where('position', '==', position));
+                const querySnapshot = await getDocs(q);
+                candidatesByPosition[position] = querySnapshot.docs.map(doc => ({
                     id: doc.id,
                     ...doc.data()
                 }));
-                setCandidates(candidatesList);
-            } catch (error) {
-                setMessage('Error fetching candidates: ' + error.message);
             }
+
+            setCandidates(candidatesByPosition);
         };
 
-        fetchCandidates();
-    }, []);
+        if (positions.length > 0) {
+            fetchCandidates();
+        }
+    }, [positions]);
 
-    const handleVoteChange = (candidateId) => {
-        setSelectedVotes(prevVotes => ({
-            ...prevVotes,
-            [candidateId]: (prevVotes[candidateId] || 0) + 1
-        }));
-    };
-
-    const handleVoteSubmit = async (event) => {
-        event.preventDefault();
-        setMessage('');
+    const handleVote = async (position, candidateId) => {
+        if (voter.hasVoted[position]) {
+            setMessage(`You have already voted for ${position}`);
+            return;
+        }
 
         try {
-            const voter = JSON.parse(sessionStorage.getItem('voter'));
-            if (!voter) {
-                setMessage('You must be logged in to vote.');
-                return;
-            }
+            // Increment the candidate's votes
+            const candidateRef = doc(db, 'candidates', candidateId);
+            await updateDoc(candidateRef, {
+                votes: (candidates[position].find(c => c.id === candidateId).votes || 0) + 1
+            });
 
+            // Mark voter as having voted for this position
             const voterRef = doc(db, 'voters', voter.id);
-            await updateDoc(voterRef, { votes: selectedVotes });
+            await updateDoc(voterRef, {
+                [`hasVoted.${position}`]: true
+            });
 
-            setMessage('Your vote has been successfully submitted!');
+            setMessage(`Successfully voted for ${candidates[position].find(c => c.id === candidateId).name}`);
+            voter.hasVoted[position] = true;
         } catch (error) {
-            setMessage('Error submitting your vote: ' + error.message);
+            setMessage('Error voting: ' + error.message);
         }
     };
 
     return (
-        <div className="container">
-            <h1>Vote for Candidates</h1>
-            {message && <p>{message}</p>}
-            <form onSubmit={handleVoteSubmit}>
-                {candidates.map(candidate => (
-                    <div key={candidate.id}>
-                        <h3>{candidate.name}</h3>
-                        <p>Position: {candidate.position}</p>
-                        <p>Email: {candidate.email}</p>
-                        <p>Unit: {candidate.unit}</p>
-                        <p>Level: {candidate.level}</p>
-                        <button
-                            type="button"
-                            onClick={() => handleVoteChange(candidate.id)}
-                        >
-                            Vote for {candidate.name}
-                        </button>
+        <div className="voting-container">
+            <h1>Vote for Your Candidates</h1>
+            {positions.map((position) => (
+                <div key={position} className="position-section">
+                    <h2>{position}</h2>
+                    <div className="candidates-list">
+                        {candidates[position] ? (
+                            candidates[position].map((candidate) => (
+                                <div key={candidate.id} className="candidate-card">
+                                    <img src={candidate.pictureURL} alt={candidate.name} className="candidate-image" />
+                                    <div className="candidate-details">
+                                        <h3>{candidate.name}</h3>
+                                        <p><strong>Unit:</strong> {candidate.unit}</p>
+                                        <p><strong>Level:</strong> {candidate.level}</p>
+                                        <p><strong>Position:</strong> {candidate.position}</p>
+                                    </div>
+                                    <button 
+                                        onClick={() => handleVote(position, candidate.id)}
+                                        disabled={voter.hasVoted[position]}
+                                    >
+                                        {voter.hasVoted[position] ? 'Voted' : 'Vote'}
+                                    </button>
+                                </div>
+                            ))
+                        ) : (
+                            <p>No candidates available for this position.</p>
+                        )}
                     </div>
-                ))}
-                <button type="submit">Submit Vote</button>
-            </form>
-        </div>
-    );
-};
-
-export default VotingPage;
-*/
-import React, { useState, useEffect } from 'react';
-import { db } from '../firebaseConfig';
-import { collection, getDocs, doc, updateDoc, increment, getDoc } from 'firebase/firestore';
-import { useNavigate } from 'react-router-dom';
-import styles from './VotingPage.module.css';
-
-const VotingPage = ({ voterId }) => {
-    const [candidates, setCandidates] = useState([]);
-    const [message, setMessage] = useState('');
-    const navigate = useNavigate();
-
-    useEffect(() => {
-        const fetchCandidates = async () => {
-            try {
-                const querySnapshot = await getDocs(collection(db, 'candidates'));
-                const candidatesList = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                setCandidates(candidatesList);
-            } catch (error) {
-                setMessage('Error fetching candidates: ' + error.message);
-            }
-        };
-
-        fetchCandidates();
-    }, []);
-
-    const handleVote = async (candidateId, position) => {
-        try {
-            const voterDocRef = doc(db, 'voters', voterId);
-            const voterDoc = await getDoc(voterDocRef);
-            if (voterDoc.exists()) {
-                const voterData = voterDoc.data();
-                if (voterData.votes[position]) {
-                    setMessage('You have already voted for this position.');
-                    return;
-                }
-
-                const candidateDocRef = doc(db, 'candidates', candidateId);
-                await updateDoc(candidateDocRef, {
-                    votesCount: increment(1)
-                });
-
-                const updatedVotes = { ...voterData.votes, [position]: candidateId };
-                await updateDoc(voterDocRef, { votes: updatedVotes });
-
-                setMessage('Vote recorded successfully!');
-            } else {
-                setMessage('Voter not found.');
-            }
-        } catch (error) {
-            setMessage('Error recording vote: ' + error.message);
-        }
-    };
-
-    return (
-        <div className={styles.container}>
-            <h1>Voting Page</h1>
+                </div>
+            ))}
             <p>{message}</p>
-            <div className={styles.candidatesList}>
-                {candidates.map(candidate => (
-                    <div key={candidate.id} className={styles.candidate}>
-                        <img src={candidate.pictureURL} alt={candidate.name} className={styles.candidatePicture} />
-                        <div className={styles.candidateDetails}>
-                            <h3>{candidate.name}</h3>
-                            <p>{candidate.position}</p>
-                            <button onClick={() => handleVote(candidate.id, candidate.position)}>
-                                Vote for {candidate.name}
-                            </button>
-                        </div>
-                    </div>
-                ))}
-            </div>
         </div>
     );
 };
 
 export default VotingPage;
-
-
