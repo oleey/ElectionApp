@@ -23,11 +23,26 @@ const VotingPage = () => {
         };
 
         fetchCandidates();
+
+        const voteForCandidate = async (candidateId) => {
+            try {
+                const userDoc = doc(db, 'voters', regNo);
+                await updateDoc(userDoc, {
+                    votedFor: candidateId
+                });
+                setMessage('Your vote has been recorded!');
+                setVoted(true);
+            } catch (error) {
+                setMessage('Error voting for candidate: ' + error.message);
+            }
+        };
     }, [navigate]);
 
     const handleVoteChange = (position, candidateId) => {
         setSelectedVotes(prevVotes => ({ ...prevVotes, [position]: candidateId }));
     };
+
+    
 
     const handleSubmitVotes = async () => {
         const voter = JSON.parse(sessionStorage.getItem('voter'));
@@ -60,26 +75,21 @@ const VotingPage = () => {
     return (
         <div className="container">
             <h1>Vote for Candidates</h1>
-            {Object.entries(candidates.reduce((positions, candidate) => {
-                if (!positions[candidate.position]) positions[candidate.position] = [];
-                positions[candidate.position].push(candidate);
-                return positions;
-            }, {})).map(([position, candidates]) => (
-                <div key={position}>
-                    <h3>{position}</h3>
-                    {candidates.map(candidate => (
-                        <div key={candidate.id}>
-                            <input
-                                type="radio"
-                                name={position}
-                                value={candidate.id}
-                                onChange={() => handleVoteChange(position, candidate.id)}
-                            />
-                            <label>{candidate.name}</label>
-                        </div>
-                    ))}
-                </div>
-            ))}
+            <h2>Candidates List</h2>
+                        <ul>
+                            {candidates.map(candidate => (
+                                <li key={candidate.id}>
+                                    <p>Name: {candidate.name}</p>
+                                    <p>Unit: {candidate.unit}</p>
+                                    <p>Level: {candidate.level}</p>
+                                    <p>Email Address: {candidate.email}</p>
+                                    <p>Position:{candidate.position}</p>
+                                    <img src={candidate.pictureURL} alt={candidate.name} width="100" />
+                                    <button onClick={() => voteForCandidate(candidate.id)}>Vote</button>
+                                </li>
+                            ))}
+                        </ul>
+                        <p>{message}</p>
             <button onClick={handleSubmitVotes}>Submit Votes</button>
             <p>{message}</p>
         </div>

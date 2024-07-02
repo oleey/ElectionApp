@@ -1,20 +1,20 @@
 import React, { useState } from 'react';
 import { db } from '../firebaseConfig';
 import { collection, getDocs, query, where } from 'firebase/firestore';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 const VoterLogin = () => {
-    const [regNumber, setRegNumber] = useState('');
+    const [regNo, setRegNumber] = useState('');
     const [password, setPassword] = useState('');
     const [message, setMessage] = useState('');
-    const history = useHistory();
+    const navigate = useNavigate();
 
     const handleLogin = async (event) => {
         event.preventDefault();
         setMessage('');
 
         try {
-            const q = query(collection(db, 'voters'), where('regNumber', '==', regNumber), where('password', '==', password));
+            const q = query(collection(db, 'voters'), where('regNo', '==', regNo), where('password', '==', password));
             const querySnapshot = await getDocs(q);
 
             if (querySnapshot.empty) {
@@ -29,8 +29,8 @@ const VoterLogin = () => {
             }
 
             // Store voter info in session storage and navigate to the voting page
-            sessionStorage.setItem('voter', JSON.stringify({ regNumber }));
-            history.push('/vote');
+            sessionStorage.setItem('voter', JSON.stringify({ regNo }));
+            navigate('/vote');
         } catch (error) {
             setMessage('Error logging in: ' + error.message);
         }
@@ -42,7 +42,7 @@ const VoterLogin = () => {
             <form onSubmit={handleLogin}>
                 <label>
                     Registration Number:
-                    <input type="text" value={regNumber} onChange={(e) => setRegNumber(e.target.value)} required />
+                    <input type="text" value={regNo} onChange={(e) => setRegNumber(e.target.value)} required />
                 </label>
                 <label>
                     Password:
