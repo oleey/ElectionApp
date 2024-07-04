@@ -5,6 +5,7 @@ import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
 
 const UploadCandidate = () => {
     const [name, setName] = useState('');
+
     const [unit, setUnit] = useState('');
     const [level, setLevel] = useState('');
     const [position, setPosition] = useState('');
@@ -76,7 +77,7 @@ const UploadCandidate = () => {
                 level,
                 position,
                 pictureURL,
-                votescount: 0
+                votes: 0
             });
 
            // console.log('Candidate ID:', result.id); // You can use the ID for further processing if needed
@@ -127,7 +128,32 @@ const UploadCandidate = () => {
                 </label>
                 <label>
                     Position:
-                    <input type="text" value={position} onChange={(e) => setPosition(e.target.value)} required />
+                    <select value={position} onChange={(e) => setPosition(e.target.value)} required>
+                    <option value="President">President</option>
+                        <option value="Provost">Provost</option>
+                        <option value="Public Relation Officer">Public Relation Officer</option>
+                        <option value="Treasurer">Treasurer</option>
+                        <option value="Vice President">Vice President</option>
+                        <option value="Welfare Director">Welfare Director</option>
+                        <option value="">Select Position</option>
+                        <option value="Assistant General Secretary">Assistant General Secretary</option>
+                        <option value="Director of Environment">Director of Environment</option>
+                        <option value="Director of Games">Director of Games</option>
+                        <option value="Director of Social">Director of Social</option>
+                        <option value="Director of Transport">Director of Transport</option>
+                        <option value="Financial Secretary">Financial Secretary</option>
+                        <option value="General Secretary">General Secretary</option>
+                        
+
+
+
+
+
+
+
+
+
+                    </select>
                 </label>
                 <label>
                     Picture:

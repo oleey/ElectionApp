@@ -19,7 +19,7 @@ const RegisterVoter = () => {
                 regNo: regNo,
                 unit: unit,
                 level: level,
-                hasVoted: {} // Initialize as an empty object
+                hasVoted: false // Initialize as an empty object
             });
             setMessage('Voters accredited successfully!');
         } catch (error) {

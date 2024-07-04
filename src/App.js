@@ -6,6 +6,8 @@ import UploadCandidate from './components/UploadCandidate';
 import AdminDashboard from './components/AdminDashboard';
 import VotingPage from './components/VotingPage';
 import VoterLogin from './components/VoterLogin';
+import ResultsPage from './components/ResultsPage';
+import VoterListPage from './components/VoterListPage';
 
 
 import './App.css';
@@ -17,6 +19,10 @@ const App = () => {
                 <Route path="/" element={<AdminLogin/>} />
                 <Route path="/admin-dashboard" element={<AdminDashboard />} />
                 <Route path="/vote" element={<VotingPage />} />
+                <Route path="/allvoters" element={<VoterListPage />} />
+
+                <Route path="/results" element={<ResultsPage />} />
+
                 <Route path="/voter-login" element={<VoterLogin />} />
 
                 <Route path="/register-voter" element={<RegisterVoter />} />

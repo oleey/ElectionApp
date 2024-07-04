@@ -1,17 +1,11 @@
 /* VoterListPage.css */
-.voting-page-container {
+.voter-list-container {
     padding: 20px;
     height: 80vh; /* Adjust height as needed */
     overflow-y: auto; /* Enable vertical scrolling */
     border: 1px solid #ddd;
     border-radius: 5px;
     background-color: #f9f9f9;
-  }
-  .candidate-image {
-    width: 100px;  /* Fixed width */
-    height: 100px; /* Fixed height */
-    object-fit: cover; /* Ensure the image covers the area */
-    margin-right: 15px;
   }
   
   ul {

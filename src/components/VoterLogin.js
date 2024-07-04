@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { db } from '../firebaseConfig';
-import { collection, getDocs, query, where } from 'firebase/firestore';
+import { collection, query, where, getDocs, updateDoc } from 'firebase/firestore';
 import { useNavigate } from 'react-router-dom';
 
 const VoterLogin = () => {
-    const [regNo, setRegNumber] = useState('');
+    const [regNo, setRegNo] = useState('');
     const [password, setPassword] = useState('');
     const [message, setMessage] = useState('');
     const navigate = useNavigate();
@@ -14,43 +14,68 @@ const VoterLogin = () => {
         setMessage('');
 
         try {
-            const q = query(collection(db, 'voters'), where('regNo', '==', regNo), where('password', '==', password));
+            const votersRef = collection(db, 'voters');
+            const q = query(votersRef, where('regNo', '==', regNo));
             const querySnapshot = await getDocs(q);
+           // await updateDoc(q, { password: "true" });
+          // await updateDoc(votersRef, { password: "true"});
+
+
 
             if (querySnapshot.empty) {
-                setMessage('Invalid registration number or password');
+                setMessage('Voter does not exist.');
                 return;
             }
 
-            const voterData = querySnapshot.docs[0].data();
+            const voterDoc = querySnapshot.docs[0];
+            const voterData = voterDoc.data();
+
+            if (voterData.password !== password) {
+                setMessage('Incorrect password.');
+                return;
+            }
+
             if (voterData.hasVoted) {
                 setMessage('You have already voted.');
                 return;
             }
 
-            // Store voter info in session storage and navigate to the voting page
-            sessionStorage.setItem('voter', JSON.stringify({ regNo }));
+
+            localStorage.setItem('voterId', voterDoc.id);
+            console.log('localStorage', localStorage.getItem('voterId'));
+
             navigate('/vote');
         } catch (error) {
-            setMessage('Error logging in: ' + error.message);
+            console.error('Error logging in:', error);
+            setMessage('An error occurred during login. Please try again.');
         }
     };
 
     return (
-        <div className="container">
+        <div className="login-container">
             <h1>Voter Login</h1>
             <form onSubmit={handleLogin}>
                 <label>
                     Registration Number:
-                    <input type="text" value={regNo} onChange={(e) => setRegNumber(e.target.value)} required />
+                    <input
+                        type="text"
+                        value={regNo}
+                        onChange={(e) => setRegNo(e.target.value)}
+                        required
+                    />
                 </label>
                 <label>
                     Password:
-                    <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+                    <input
+                        type="password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        required
+                    />
                 </label>
                 <button type="submit">Login</button>
             </form>
-            <p>{message}</p>
+            {message && <p>{message}</p>}
         </div>
     );
 };
