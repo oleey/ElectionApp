@@ -7,7 +7,7 @@ import './ResultPage.css';
 const ResultsPage = () => {
     const [results, setResults] = useState({});
     const [candidates, setCandidates] = useState({});
-    const positions = ['President', 'Vice President', 'Welfare Director', 'Assistant General Secretary', 'Director of Environment', 'Director of Games', 'Director of Social', 'Director of Transport', 'Financial Secretary', 'General Secretary', 'Provost', 'Public Relation Officer', 'Treasurer'];
+    const positions = ['President', 'Vice President', 'Welfare Director', 'Assistant General Secretary', 'Director of Games', 'Director of Social', 'Financial Secretary', 'General Secretary', 'Provost', 'Public Relation Officer', 'Treasurer'];
 
     useEffect(() => {
         const fetchResults = async () => {

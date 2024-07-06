@@ -91,7 +91,6 @@ const VoterListPage = () => {
                         <th>Registration Number</th>
                         <th>Level</th>
                         <th>Unit</th>
-                        <th>Has Voted</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -100,7 +99,6 @@ const VoterListPage = () => {
                             <td>{voter.regNo}</td>
                             <td>{voter.level}</td>
                             <td>{voter.unit}</td>
-                            <td>{voter.hasVoted ? 'Yes' : 'No'}</td>
                         </tr>
                     ))}
                 </tbody>
