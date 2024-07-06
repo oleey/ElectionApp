@@ -1,9 +1,14 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, navigate} from 'react';
 import { db } from '../firebaseConfig';
-import { collection, getDocs, updateDoc, doc, getDoc, setDoc } from 'firebase/firestore';
+import { collection, getDocs, updateDoc, doc, getDoc, setDoc, writeBatch } from 'firebase/firestore';
+import { useNavigate } from 'react-router-dom';
+
+
 import './VotingPage.css';
 
 const VotingPage = () => {
+    const navigate = useNavigate();
+
     const [candidates, setCandidates] = useState([]);
     const [selectedVotes, setSelectedVotes] = useState({});
     const voterId = localStorage.getItem('voterId');
@@ -26,6 +31,9 @@ const VotingPage = () => {
     const handleSubmitVote = async () => {
         if (!voterId) {
             alert('No voter ID found. Please log in again.');
+            navigate('/voter-login');
+
+
             return;
         }
 
@@ -35,6 +43,8 @@ const VotingPage = () => {
 
             if (!voterDoc.exists) {
                 alert('Voter does not exist.');
+                navigate('/voter-login');
+
                 return;
             }
 
@@ -42,6 +52,8 @@ const VotingPage = () => {
 
             if (voterData.hasVoted) {
                 alert('You have already voted.');
+                navigate('/voter-login');
+
                 return;
             }
 
@@ -66,11 +78,70 @@ const VotingPage = () => {
             await updateDoc(voterRef, { hasVoted: true });
 
             alert('Your vote has been recorded. Thank you!');
+            navigate('/voter-login');
+
         } catch (error) {
             console.error('Error submitting vote:', error);
             alert('An error occurred while submitting your vote. Please try again.');
         }
     };
+
+   /* // Handle submitting votes
+const handleSubmitVote = async () => {
+    if (!voterId) {
+        alert('No voter ID found. Please log in again.');
+        navigate('/voter-login');
+
+        return;
+    }
+
+    try {
+        // Check if the voter has already voted
+        const voterRef = doc(db, 'voters', voterId);
+        const voterDoc = await getDoc(voterRef);
+
+        if (!voterDoc.exists) {
+            alert('Voter does not exist.');
+            navigate('/voter-login');
+            return;
+        }
+
+        const voterData = voterDoc.data();
+
+        if (voterData.hasVoted) {
+            alert('You have already voted.');
+            navigate('/voter-login');
+            return;
+        }
+
+        const batch = writeBatch(db);
+
+        // Batch the vote updates
+        for (const position in selectedVotes) {
+            const candidateId = selectedVotes[position];
+            const voteRef = doc(db, 'votes', position, candidateId);
+
+            const voteDoc = await getDoc(voteRef);
+
+            if (voteDoc.exists) {
+                batch.update(voteRef, { count: voteDoc.data().count + 1 });
+            } else {
+                batch.set(voteRef, { count: 1 });
+            }
+        }
+
+        // Update the voter document to mark as voted
+        batch.update(voterRef, { hasVoted: true });
+
+        await batch.commit();
+
+        alert('Your vote has been recorded. Thank you!');
+    } catch (error) {
+        console.error('Error submitting vote:', error);
+        alert('An error occurred while submitting your vote. Please try again.');
+    }
+};
+*/
 
     return (
         <div className="voting-page-container">
@@ -304,3 +375,4 @@ const VotingPage = () => {
 };
 
 export default VotingPage;
+

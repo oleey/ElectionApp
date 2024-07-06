@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+/*import React, { useEffect, useState } from 'react';
 import { db } from '../firebaseConfig';
 import { collection, getDocs } from 'firebase/firestore';
 import './VoterListPage.css';
@@ -110,3 +110,69 @@ const VoterListPage = () => {
 };
 
 export default VoterListPage;
+*/
+
+import React, { useState, useEffect } from 'react';
+import { db } from '../firebaseConfig';
+import { collection, query, orderBy, limit, startAfter, getDocs } from 'firebase/firestore';
+import './VoterListPage.css';
+
+
+const VotersList = () => {
+    const [voters, setVoters] = useState([]);
+    const [lastVisible, setLastVisible] = useState(null);
+    const [loading, setLoading] = useState(false);
+    const pageSize = 20;
+
+    const fetchVoters = async () => {
+        setLoading(true);
+        try {
+            const votersRef = collection(db, 'voters');
+            const q = query(votersRef, orderBy('regNo'), limit(pageSize));
+            const snapshot = await getDocs(q);
+            const votersList = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            setVoters(votersList);
+            setLastVisible(snapshot.docs[snapshot.docs.length - 1]);
+        } catch (error) {
+            console.error('Error fetching voters:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const fetchMoreVoters = async () => {
+        setLoading(true);
+        try {
+            const votersRef = collection(db, 'voters');
+            const q = query(votersRef, orderBy('regNo'), startAfter(lastVisible), limit(pageSize));
+            const snapshot = await getDocs(q);
+            const moreVoters = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            setVoters(prevVoters => [...prevVoters, ...moreVoters]);
+            setLastVisible(snapshot.docs[snapshot.docs.length - 1]);
+        } catch (error) {
+            console.error('Error fetching more voters:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchVoters();
+    }, []);
+
+    return (
+            <div className="voter-list-container">
+
+            <h1>Registered Voters</h1>
+            <ul>
+                {voters.map(voter => (
+                    <li key={voter.id}>{voter.regNo} - {voter.level} - {voter.unit}</li>
+                ))}
+            </ul>
+            {loading && <p>Loading...</p>}
+            <button onClick={fetchMoreVoters} disabled={loading}>Load More</button>
+        </div>
+    );
+};
+
+export default VotersList;
