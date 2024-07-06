@@ -26,7 +26,7 @@ const UploadCandidate = () => {
         setMessage('');
         setProgress(0);
 
-        if (!name || !level || !unit || !picture) {
+        if (!name || !level || !unit ) {
             setMessage('All fields are required');
             setLoading(false);
             return;
@@ -37,7 +37,7 @@ const UploadCandidate = () => {
             setLoading(false);
             return;
         }*/
-
+/*
         const uploadPicture = async (picture) => {
             return new Promise((resolve, reject) => {
                 const storageRef = ref(storage, `candidates/${picture.name}`);
@@ -55,7 +55,7 @@ const UploadCandidate = () => {
                             }, 2000); // retry after 2 seconds
                         } else {
                             reject(error);
-                        }*/
+                        }
                     },
                     () => {
                         getDownloadURL(uploadTask.snapshot.ref)
@@ -64,10 +64,10 @@ const UploadCandidate = () => {
                     }
                 );
             });
-        };
+        };*/
 
         try {
-            const pictureURL = await uploadPicture(picture);
+           // const pictureURL = await uploadPicture(picture);
           //  console.log('111Candidate ID:', docRef.id); // You can use the ID for further processing if needed
 
 
@@ -76,7 +76,6 @@ const UploadCandidate = () => {
                 unit,
                 level,
                 position,
-                pictureURL,
                 votes: 0
             });
 
@@ -129,13 +128,14 @@ const UploadCandidate = () => {
                 <label>
                     Position:
                     <select value={position} onChange={(e) => setPosition(e.target.value)} required>
+                    <option value="">Select Position</option>
+
                     <option value="President">President</option>
                         <option value="Provost">Provost</option>
                         <option value="Public Relation Officer">Public Relation Officer</option>
                         <option value="Treasurer">Treasurer</option>
                         <option value="Vice President">Vice President</option>
                         <option value="Welfare Director">Welfare Director</option>
-                        <option value="">Select Position</option>
                         <option value="Assistant General Secretary">Assistant General Secretary</option>
                         <option value="Director of Environment">Director of Environment</option>
                         <option value="Director of Games">Director of Games</option>
@@ -155,15 +155,8 @@ const UploadCandidate = () => {
 
                     </select>
                 </label>
-                <label>
-                    Picture:
-                    <input type="file" accept="image/*" onChange={handlePictureChange} required />
-                </label>
-                {progress > 0 && (
-                    <div className="progress-bar">
-                        <div className="progress-bar-fill" style={{ width: `${progress}%` }}></div>
-                    </div>
-                )}
+                
+                
                 <button type="submit" disabled={loading}>
                     {loading ? 'Uploading...' : 'Upload'}
                 </button>
@@ -174,3 +167,14 @@ const UploadCandidate = () => {
 };
 
 export default UploadCandidate;
+
+/*<label>
+                    Picture:
+                    <input type="file" accept="image/*" onChange={handlePictureChange} required />
+                </label>
+                {progress > 0 && (
+                    <div className="progress-bar">
+                        <div className="progress-bar-fill" style={{ width: `${progress}%` }}></div>
+                    </div>
+                )}
+                    */

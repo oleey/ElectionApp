@@ -10,10 +10,14 @@ const VotingPage = () => {
     const navigate = useNavigate();
 
     const [candidates, setCandidates] = useState([]);
+    const [loading, setLoading] = useState(true);
     const [selectedVotes, setSelectedVotes] = useState({});
     const voterId = localStorage.getItem('voterId');
 
+    
+
     useEffect(() => {
+
         const fetchCandidates = async () => {
             const candidatesRef = collection(db, 'candidates');
             const candidatesSnapshot = await getDocs(candidatesRef);
@@ -51,7 +55,7 @@ const VotingPage = () => {
             const voterData = voterDoc.data();
 
             if (voterData.hasVoted) {
-                alert('You have already voted.');
+                alert('Voted.');
                 navigate('/voter-login');
 
                 return;
@@ -77,7 +81,7 @@ const VotingPage = () => {
 
             await updateDoc(voterRef, { hasVoted: true });
 
-            alert('Your vote has been recorded. Thank you!');
+            alert('Voted.');
             navigate('/voter-login');
 
         } catch (error) {
@@ -144,6 +148,38 @@ const handleSubmitVote = async () => {
 */
 
     return (
+
+        /*
+        <div className="voting-page-container">
+        <h1>Vote for Your Candidates</h1>
+        {loading ? (
+            <p>Loading candidates...</p>
+        ) : (
+            <>
+                {['President', 'Vice President', 'Welfare Director', 'General Secretary', 'Assistant General Secretary', 'Financial Secretary', 'Treasurer', 'Director of Social', 'Director of Games', 'Public Relation Officer', 'Director of Environment', 'Director of Transport', 'Provost'].map(position => (
+                    <div key={position}>
+                        <h2>{position} Candidates</h2>
+                        {candidates.filter(candidate => candidate.position === position).map(candidate => (
+                            <div key={candidate.id} className="candidate">
+                                <img className="candidate-image" src={candidate.pictureURL} alt={candidate.name} />
+                                <p>{candidate.name}</p>
+                                <p>{candidate.unit}</p>
+                                <p>{candidate.level}</p>
+                                <input
+                                    type="radio"
+                                    name={position}
+                                    value={candidate.id}
+                                    onChange={() => handleVoteChange(position, candidate.id)}
+                                />
+                            </div>
+                        ))}
+                    </div>
+                ))}
+            </>
+        )}
+        <button onClick={handleSubmitVote}>Submit Vote</button>
+    </div>
+        */
         <div className="voting-page-container">
             <h1>Vote for Your Candidates</h1>
             {candidates.length > 0 ? (
@@ -151,7 +187,6 @@ const handleSubmitVote = async () => {
                     <h2>Presidential Candidates</h2>
                     {candidates.filter(candidate => candidate.position === 'President').map(candidate => (
                         <div key={candidate.id} className="candidate">
-                            <img className='candidate-image' src={candidate.pictureURL} alt={candidate.name} />
                             <p>{candidate.name}</p>
                             <p>{candidate.unit}</p>
                             <p>{candidate.level}</p>
@@ -166,7 +201,6 @@ const handleSubmitVote = async () => {
                     <h2>Vice Presidential Candidates</h2>
                     {candidates.filter(candidate => candidate.position === 'Vice President').map(candidate => (
                         <div key={candidate.id} className="candidate">
-                             <img className='candidate-image' src={candidate.pictureURL} alt={candidate.name} />
 
                             <p>{candidate.name}</p>
                             <p>{candidate.unit}</p>
@@ -179,19 +213,18 @@ const handleSubmitVote = async () => {
                             />
                         </div>
                     ))}
-                    <h2>Welfare Officer Candidates</h2>
-                    {candidates.filter(candidate => candidate.position === 'Welfare Officer').map(candidate => (
+                    <h2>Welfare Director Candidates</h2>
+                    {candidates.filter(candidate => candidate.position === 'Welfare Director').map(candidate => (
                         <div key={candidate.id} className="candidate">
-                                                        <img className='candidate-image' src={candidate.pictureURL} alt={candidate.name} />
 
                             <p>{candidate.name}</p>
                             <p>{candidate.unit}</p>
                             <p>{candidate.level}</p>
                             <input
                                 type="radio"
-                                name="Welfare Officer"
+                                name="Welfare Director"
                                 value={candidate.id}
-                                onChange={() => handleVoteChange('Welfare Officer', candidate.id)}
+                                onChange={() => handleVoteChange('Welfare Director', candidate.id)}
                             />
                         </div>
                     ))}
@@ -199,7 +232,6 @@ const handleSubmitVote = async () => {
 <h2>General Secretary Candidates</h2>
                     {candidates.filter(candidate => candidate.position === 'General Secretary').map(candidate => (
                         <div key={candidate.id} className="candidate">
-                                                        <img className='candidate-image' src={candidate.pictureURL} alt={candidate.name} />
 
                             <p>{candidate.name}</p>
                             <p>{candidate.unit}</p>
@@ -216,7 +248,6 @@ const handleSubmitVote = async () => {
 <h2>Assistant General Secretary Candidates</h2>
                     {candidates.filter(candidate => candidate.position === 'Assistant General Secretary').map(candidate => (
                         <div key={candidate.id} className="candidate">
-                                                        <img className='candidate-image' src={candidate.pictureURL} alt={candidate.name} />
 
                             <p>{candidate.name}</p>
                             <p>{candidate.unit}</p>
@@ -233,7 +264,6 @@ const handleSubmitVote = async () => {
 <h2>Financial Secretary Candidates</h2>
                     {candidates.filter(candidate => candidate.position === 'Financial Secretary').map(candidate => (
                         <div key={candidate.id} className="candidate">
-                                                        <img className='candidate-image' src={candidate.pictureURL} alt={candidate.name} />
 
                             <p>{candidate.name}</p>
                             <p>{candidate.unit}</p>
@@ -250,7 +280,6 @@ const handleSubmitVote = async () => {
 <h2>Treasurer Candidates</h2>
                     {candidates.filter(candidate => candidate.position === 'Treasurer').map(candidate => (
                         <div key={candidate.id} className="candidate">
-                                                        <img className='candidate-image' src={candidate.pictureURL} alt={candidate.name} />
 
                             <p>{candidate.name}</p>
                             <p>{candidate.unit}</p>
@@ -266,7 +295,6 @@ const handleSubmitVote = async () => {
                     <h2>Director of Social Candidates</h2>
                     {candidates.filter(candidate => candidate.position === 'Director of Social').map(candidate => (
                         <div key={candidate.id} className="candidate">
-                                                        <img className='candidate-image' src={candidate.pictureURL} alt={candidate.name} />
 
                             <p>{candidate.name}</p>
                             <p>{candidate.unit}</p>
@@ -283,7 +311,6 @@ const handleSubmitVote = async () => {
 <h2>Director of Games Candidates</h2>
                     {candidates.filter(candidate => candidate.position === 'Director of Games').map(candidate => (
                         <div key={candidate.id} className="candidate">
-                                                        <img className='candidate-image' src={candidate.pictureURL} alt={candidate.name} />
 
                             <p>{candidate.name}</p>
                             <p>{candidate.unit}</p>
@@ -300,7 +327,6 @@ const handleSubmitVote = async () => {
 <h2>Public Relation Officer Candidates</h2>
                     {candidates.filter(candidate => candidate.position === 'Public Relation Officer').map(candidate => (
                         <div key={candidate.id} className="candidate">
-                                                        <img className='candidate-image' src={candidate.pictureURL} alt={candidate.name} />
 
                             <p>{candidate.name}</p>
                             <p>{candidate.unit}</p>
@@ -314,44 +340,9 @@ const handleSubmitVote = async () => {
                         </div>
                     ))}
 
-<h2>Director of Environment Candidates</h2>
-                    {candidates.filter(candidate => candidate.position === 'Director of Environment').map(candidate => (
-                        <div key={candidate.id} className="candidate">
-                                                        <img className='candidate-image' src={candidate.pictureURL} alt={candidate.name} />
-
-                            <p>{candidate.name}</p>
-                            <p>{candidate.unit}</p>
-                            <p>{candidate.level}</p>
-                            <input
-                                type="radio"
-                                name="Director of Environment"
-                                value={candidate.id}
-                                onChange={() => handleVoteChange('Director of Environment', candidate.id)}
-                            />
-                        </div>
-                    ))}
-
-<h2>Director of Transport Candidates</h2>
-                    {candidates.filter(candidate => candidate.position === 'Director of Transport').map(candidate => (
-                        <div key={candidate.id} className="candidate">
-                                                        <img className='candidate-image' src={candidate.pictureURL} alt={candidate.name} />
-
-                            <p>{candidate.name}</p>
-                            <p>{candidate.unit}</p>
-                            <p>{candidate.level}</p>
-                            <input
-                                type="radio"
-                                name="Director of Transport"
-                                value={candidate.id}
-                                onChange={() => handleVoteChange('Director of Transport', candidate.id)}
-                            />
-                        </div>
-                    ))}
-
 <h2>Provost Candidates</h2>
                     {candidates.filter(candidate => candidate.position === 'Provost').map(candidate => (
                         <div key={candidate.id} className="candidate">
-                                                        <img className='candidate-image' src={candidate.pictureURL} alt={candidate.name} />
 
                             <p>{candidate.name}</p>
                             <p>{candidate.unit}</p>
@@ -365,12 +356,47 @@ const handleSubmitVote = async () => {
                         </div>
                     ))}
 
+<h2>Director of Environment Candidates</h2>
+                    {candidates.filter(candidate => candidate.position === 'Director of Environment').map(candidate => (
+                        <div key={candidate.id} className="candidate">
+
+                            <p>{candidate.name}</p>
+                            <p>{candidate.unit}</p>
+                            <p>{candidate.level}</p>
+                            <input
+                                type="radio"
+                                name="Director of Environment"
+                                value={candidate.id}
+                                onChange={() => handleVoteChange('Director of Environment', candidate.id)}
+                            />
+                        </div>
+                    ))}
+
+<h2>Libarian Candidates</h2>
+                    {candidates.filter(candidate => candidate.position === 'Libarian').map(candidate => (
+                        <div key={candidate.id} className="candidate">
+
+                            <p>{candidate.name}</p>
+                            <p>{candidate.unit}</p>
+                            <p>{candidate.level}</p>
+                            <input
+                                type="radio"
+                                name="Libarian"
+                                value={candidate.id}
+                                onChange={() => handleVoteChange('Libarian', candidate.id)}
+                            />
+                        </div>
+                    ))}
+
+
+
                 </>
             ) : (
                 <p>Loading candidates...</p>
             )}
             <button onClick={handleSubmitVote}>Submit Vote</button>
         </div>
+        
     );
 };
 
