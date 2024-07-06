@@ -35,10 +35,11 @@ const VoterLogin = () => {
                 return;
             }
 
-            if (voterData.hasVoted) {
+           if (voterData.hasVoted) {
                 setMessage('You have already voted.');
                 return;
             }
+                
 
 
             localStorage.setItem('voterId', voterDoc.id);

@@ -1,4 +1,4 @@
-/*import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { db } from '../firebaseConfig';
 import { collection, getDocs } from 'firebase/firestore';
 import './VoterListPage.css';
@@ -110,8 +110,9 @@ const VoterListPage = () => {
 };
 
 export default VoterListPage;
-*/
 
+
+/*
 import React, { useState, useEffect } from 'react';
 import { db } from '../firebaseConfig';
 import { collection, query, orderBy, limit, startAfter, getDocs } from 'firebase/firestore';
@@ -122,6 +123,11 @@ const VotersList = () => {
     const [voters, setVoters] = useState([]);
     const [lastVisible, setLastVisible] = useState(null);
     const [loading, setLoading] = useState(false);
+    const [filteredVoters, setFilteredVoters] = useState([]);
+    const [levels, setLevels] = useState([]);
+    const [units, setUnits] = useState([]);
+    const [selectedLevel, setSelectedLevel] = useState('');
+    const [selectedUnit, setSelectedUnit] = useState('');
     const pageSize = 20;
 
     const fetchVoters = async () => {
@@ -139,6 +145,8 @@ const VotersList = () => {
             setLoading(false);
         }
     };
+
+
 
     const fetchMoreVoters = async () => {
         setLoading(true);
@@ -164,6 +172,34 @@ const VotersList = () => {
             <div className="voter-list-container">
 
             <h1>Registered Voters</h1>
+            <div className="filters">
+                <div className="filter-item">
+                    <label htmlFor="level">Filter by Level:</label>
+                    <select
+                        id="level"
+                        value={selectedLevel}
+                        onChange={(e) => setSelectedLevel(e.target.value)}
+                    >
+                        <option value="">All Levels</option>
+                        {levels.map(level => (
+                            <option key={level} value={level}>{level}</option>
+                        ))}
+                    </select>
+                </div>
+                <div className="filter-item">
+                    <label htmlFor="unit">Filter by Unit:</label>
+                    <select
+                        id="unit"
+                        value={selectedUnit}
+                        onChange={(e) => setSelectedUnit(e.target.value)}
+                    >
+                        <option value="">All Units</option>
+                        {units.map(unit => (
+                            <option key={unit} value={unit}>{unit}</option>
+                        ))}
+                    </select>
+                </div>
+            </div>
             <ul>
                 {voters.map(voter => (
                     <li key={voter.id}>{voter.regNo} - {voter.level} - {voter.unit}</li>
@@ -176,3 +212,4 @@ const VotersList = () => {
 };
 
 export default VotersList;
+*/
