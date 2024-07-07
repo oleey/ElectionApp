@@ -137,10 +137,8 @@ const UploadCandidate = () => {
                         <option value="Vice President">Vice President</option>
                         <option value="Welfare Director">Welfare Director</option>
                         <option value="Assistant General Secretary">Assistant General Secretary</option>
-                        <option value="Director of Environment">Director of Environment</option>
                         <option value="Director of Games">Director of Games</option>
                         <option value="Director of Social">Director of Social</option>
-                        <option value="Director of Transport">Director of Transport</option>
                         <option value="Financial Secretary">Financial Secretary</option>
                         <option value="General Secretary">General Secretary</option>
                         
