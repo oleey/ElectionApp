@@ -356,39 +356,6 @@ const handleSubmitVote = async () => {
                         </div>
                     ))}
 
-<h2>Director of Environment Candidates</h2>
-                    {candidates.filter(candidate => candidate.position === 'Director of Environment').map(candidate => (
-                        <div key={candidate.id} className="candidate">
-
-                            <p>{candidate.name}</p>
-                            <p>{candidate.unit}</p>
-                            <p>{candidate.level}</p>
-                            <input
-                                type="radio"
-                                name="Director of Environment"
-                                value={candidate.id}
-                                onChange={() => handleVoteChange('Director of Environment', candidate.id)}
-                            />
-                        </div>
-                    ))}
-
-<h2>Libarian Candidates</h2>
-                    {candidates.filter(candidate => candidate.position === 'Libarian').map(candidate => (
-                        <div key={candidate.id} className="candidate">
-
-                            <p>{candidate.name}</p>
-                            <p>{candidate.unit}</p>
-                            <p>{candidate.level}</p>
-                            <input
-                                type="radio"
-                                name="Libarian"
-                                value={candidate.id}
-                                onChange={() => handleVoteChange('Libarian', candidate.id)}
-                            />
-                        </div>
-                    ))}
-
-
 
                 </>
             ) : (
